@@ -76,57 +76,11 @@
 //通过接收JS传出消息的name进行捕捉的回调方法
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message{
     NSLog(@"name:%@\\\\n body:%@\\\\n frameInfo:%@\\\\n",message.name,message.body,message.frameInfo);
-    //用message.body获得JS传出的参数体
-    NSDictionary * parameter = message.body;
-    //JS调用OC
-    if([message.name isEqualToString:@"jsToOcNoPrams"]){
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"js调用到了oc" message:@"不带参数" preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:([UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        }])];
-        [self presentViewController:alertController animated:YES completion:nil];
-
-    }else if([message.name isEqualToString:@"jsToOcWithPrams"]){
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"js调用到了oc" message:message.body preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:([UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        }])];
-        [self presentViewController:alertController animated:YES completion:nil];
+    if([message.name isEqualToString:@"jsToOcWithPrams"]){
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:message.body]];
     }
 }
 
-
-// 根据WebView对于即将跳转的HTTP请求头信息和相关信息来决定是否跳转
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
-
-    NSString * urlStr = navigationAction.request.URL.absoluteString;
-    NSLog(@"发送跳转请求：%@",urlStr);
-    //自己定义的协议头
-    NSString *htmlHeadString = @"github://";
-    if([urlStr hasPrefix:htmlHeadString]){
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"通过截取URL调用OC" message:@"你想前往我的Github主页?" preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:([UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-
-        }])];
-        [alertController addAction:([UIAlertAction actionWithTitle:@"打开" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            NSURL * url = [NSURL URLWithString:[urlStr stringByReplacingOccurrencesOfString:@"github://callName_?" withString:@""]];
-            [[UIApplication sharedApplication] openURL:url];
-
-        }])];
-        [self presentViewController:alertController animated:YES completion:nil];
-
-        decisionHandler(WKNavigationActionPolicyCancel);
-
-    }else{
-        decisionHandler(WKNavigationActionPolicyAllow);
-    }
-
-
-}
-
-// 页面加载完成之后调用
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
-
-    NSLog(@"加载完成了");
-}
 
 #pragma mark - Property Accessor
 - (WKWebView *)webView{
